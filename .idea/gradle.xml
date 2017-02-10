@@ -8,7 +8,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/alphamovie" />
+            <option value="$PROJECT_DIR$/alpha-movie" />
             <option value="$PROJECT_DIR$/example" />
           </set>
         </option>
