@@ -4,9 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AlphaMovie.iml" filepath="$PROJECT_DIR$/AlphaMovie.iml" />
       <module fileurl="file://$PROJECT_DIR$/alpha-movie/alpha-movie.iml" filepath="$PROJECT_DIR$/alpha-movie/alpha-movie.iml" />
-      <module fileurl="file://$PROJECT_DIR$/alphamovie/alphamovie.iml" filepath="$PROJECT_DIR$/alphamovie/alphamovie.iml" />
-      <module fileurl="file://$PROJECT_DIR$/alphamovie2/alphamovie2.iml" filepath="$PROJECT_DIR$/alphamovie2/alphamovie2.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/example/example.iml" filepath="$PROJECT_DIR$/example/example.iml" />
     </modules>
   </component>
