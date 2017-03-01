@@ -20,7 +20,7 @@ public class AlphaMovieView extends GLTextureView {
 
     private static final String TAG = "VideoSurfaceView";
 
-    private static final float VIEW_ASPECT_RATIO = 4f / 5f;
+    private static final float VIEW_ASPECT_RATIO = 4f / 3f;
     private float videoAspectRatio = VIEW_ASPECT_RATIO;
 
     VideoRenderer renderer;
@@ -49,6 +49,8 @@ public class AlphaMovieView extends GLTextureView {
         initMediaPlayer();
 
         renderer = new VideoRenderer();
+        //renderer.setBlueShader();
+        //renderer.setAccuracy(0.2);
         this.addOnSurfacePrepareListener();
         setRenderer(renderer);
 
@@ -71,11 +73,6 @@ public class AlphaMovieView extends GLTextureView {
                 }
             }
         });
-        /*queueEvent(new Runnable() {
-            public void run() {
-                renderer.prepareSurface();
-            }
-        });*/
     }
 
     private void addOnSurfacePrepareListener() {
@@ -221,7 +218,6 @@ public class AlphaMovieView extends GLTextureView {
 
     @Override
     public void onResume() {
-        //start();
         super.onResume();
     }
 
@@ -324,16 +320,16 @@ public class AlphaMovieView extends GLTextureView {
         mediaPlayer.setLooping(looping);
     }
 
+    public void setScreenOnWhilePlaying(boolean screenOn) {
+        mediaPlayer.setScreenOnWhilePlaying(screenOn);
+    }
+
     public void setOnVideoStartedListener(OnVideoStartedListener onVideoStartedListener) {
         this.onVideoStartedListener = onVideoStartedListener;
     }
 
     public void setOnVideoEndedListener(OnVideoEndedListener onVideoEndedListener) {
         this.onVideoEndedListener = onVideoEndedListener;
-    }
-
-    public void setTransparentShader() {
-        renderer.setTransparentShader();
     }
 
     public interface OnVideoStartedListener {

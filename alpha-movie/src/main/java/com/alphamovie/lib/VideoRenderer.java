@@ -41,40 +41,57 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
                     "  vTextureCoord = (uSTMatrix * aTextureCoord).xy;\n" +
                     "}\n";
 
-    private final String solidFragmentShader = "#extension GL_OES_EGL_image_external : require\n"
+    private final String redShader = "#extension GL_OES_EGL_image_external : require\n"
             + "precision mediump float;\n"
             + "varying vec2 vTextureCoord;\n"
             + "uniform samplerExternalOES sTexture;\n"
             + "varying mediump float text_alpha_out;\n"
             + "void main() {\n"
             + "  vec4 color = texture2D(sTexture, vTextureCoord);\n"
-            + "  if (color.g - color.r > 0.18 && color.g - color.b > 0.18 && color.g > 0.95) {\n"
-            + "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
+            + "  if (color.r - color.g >= %f && color.r - color.b >= %f) {\n"
+            + "      gl_FragColor = vec4((color.g + color.b) / 2.0, color.g, color.b, 1.0 - color.r);\n"
             + "  } else {\n"
             + "      gl_FragColor = vec4(color.r, color.g, color.b, color.a);\n"
             + "  }\n"
             + "}\n";
 
-    private final String transparentFragmentShader = "#extension GL_OES_EGL_image_external : require\n"
+    private final String greenShader = "#extension GL_OES_EGL_image_external : require\n"
             + "precision mediump float;\n"
             + "varying vec2 vTextureCoord;\n"
             + "uniform samplerExternalOES sTexture;\n"
             + "varying mediump float text_alpha_out;\n"
             + "void main() {\n"
             + "  vec4 color = texture2D(sTexture, vTextureCoord);\n"
-            + "  if (color.g - color.r > 0.18 && color.g - color.b > 0.18 && color.g > 0.95) {\n"
-            + "      gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n"
+            + "  if (color.g - color.r >= %f && color.g - color.b >= %f) {\n"
+            + "      gl_FragColor = vec4(color.r, (color.r + color.b) / 2.0, color.b, 1.0 - color.g);\n"
             + "  } else {\n"
-            + "      gl_FragColor = vec4(color.r, color.g, color.b, 1.0);\n"
+            + "      gl_FragColor = vec4(color.r, color.g, color.b, color.a);\n"
             + "  }\n"
             + "}\n";
+
+    private final String blueShader = "#extension GL_OES_EGL_image_external : require\n"
+            + "precision mediump float;\n"
+            + "varying vec2 vTextureCoord;\n"
+            + "uniform samplerExternalOES sTexture;\n"
+            + "varying mediump float text_alpha_out;\n"
+            + "void main() {\n"
+            + "  vec4 color = texture2D(sTexture, vTextureCoord);\n"
+            + "  if (color.b - color.r >= %f && color.b - color.g >= %f) {\n"
+            + "      gl_FragColor = vec4(color.r, color.g, (color.r + color.g) / 2.0, 1.0 - color.b);\n"
+            + "  } else {\n"
+            + "      gl_FragColor = vec4(color.r, color.g, color.b, color.a);\n"
+            + "  }\n"
+            + "}\n";
+
+    private double accuracy = 0.5;
+
+    private String shader = greenShader;
 
     private float[] mMVPMatrix = new float[16];
     private float[] mSTMatrix = new float[16];
 
     private int mProgram;
     private int mProgramTransparent;
-    private boolean useSolidShader = false;
     private int mTextureID;
     private int muMVPMatrixHandle;
     private int muSTMatrixHandle;
@@ -112,11 +129,7 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-        if (useSolidShader) {
-            GLES20.glUseProgram(mProgram);
-        } else {
-            GLES20.glUseProgram(mProgramTransparent);
-        }
+        GLES20.glUseProgram(mProgram);
         checkGlError("glUseProgram");
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
@@ -157,8 +170,7 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
 
     @Override
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
-        mProgram = createProgram(mVertexShader, solidFragmentShader);
-        mProgramTransparent = createProgram(mVertexShader, transparentFragmentShader);
+        mProgram = createProgram(mVertexShader, this.resolveShader());
         if (mProgram == 0) {
             return;
         }
@@ -262,8 +274,33 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
         return program;
     }
 
-    void setTransparentShader() {
-        useSolidShader = true;
+    public void setRedShader() {
+        shader = redShader;
+    }
+
+    public void setGreenShader() {
+        shader = greenShader;
+    }
+
+    public void setBlueShader() {
+        shader = blueShader;
+    }
+
+    public void setAccuracy(double accuracy) {
+        if (accuracy > 1.0) {
+            accuracy = 1.0;
+        } else if (accuracy < 0.0) {
+            accuracy = 0.0;
+        }
+        this.accuracy = accuracy;
+    }
+
+    public double getAccuracy() {
+        return accuracy;
+    }
+
+    private String resolveShader() {
+        return String.format(shader, accuracy, accuracy);
     }
 
     private void checkGlError(String op) {

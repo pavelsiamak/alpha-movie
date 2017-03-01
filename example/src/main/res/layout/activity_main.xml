@@ -5,10 +5,17 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:orientation="vertical">
 
-    <com.alphamovie.lib.AlphaMovieView
-        android:id="@+id/video_player"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="270dip"
+        android:background="@drawable/court">
+
+        <com.alphamovie.lib.AlphaMovieView
+            android:id="@+id/video_player"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"/>
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
