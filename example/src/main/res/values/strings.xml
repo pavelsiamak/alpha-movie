@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Alpha Movie</string>
+    <string name="shader_custom">#extension GL_OES_EGL_image_external : require\n
+            precision mediump float;
+            varying vec2 vTextureCoord;
+            uniform samplerExternalOES sTexture;
+            varying mediump float text_alpha_out;
+            void main() {
+              vec4 color = texture2D(sTexture, vTextureCoord);
+              if (color.b - color.r >= 0.1 &amp;&amp; color.b - color.g >= 0.1) {
+                  gl_FragColor = vec4(color.r, color.g, (color.r + color.g) / 2.0, 1.0 - color.b);
+              } else {
+                  gl_FragColor = vec4(color.r, color.g, color.b, color.a);
+              }
+            }</string>
 </resources>

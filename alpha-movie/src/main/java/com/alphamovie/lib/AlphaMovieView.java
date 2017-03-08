@@ -4,9 +4,11 @@ import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
+import android.content.res.TypedArray;
 import android.media.MediaDataSource;
 import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
@@ -17,6 +19,10 @@ import java.util.HashMap;
 
 @SuppressLint("ViewConstructor")
 public class AlphaMovieView extends GLTextureView {
+
+    private static final String RED = "0";
+    private static final String GREEN = "1";
+    private static final String BLUE = "2";
 
     private static final String TAG = "VideoSurfaceView";
 
@@ -38,19 +44,20 @@ public class AlphaMovieView extends GLTextureView {
         super(context, attrs);
 
         if (!isInEditMode()) {
-            init();
+            init(attrs);
         }
     }
 
-    private void init() {
+    private void init(AttributeSet attrs) {
         setEGLContextClientVersion(2);
         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
 
         initMediaPlayer();
 
         renderer = new VideoRenderer();
-        //renderer.setBlueShader();
-        //renderer.setAccuracy(0.2);
+
+        obtainRendererOptions(attrs);
+
         this.addOnSurfacePrepareListener();
         setRenderer(renderer);
 
@@ -59,7 +66,7 @@ public class AlphaMovieView extends GLTextureView {
         setOpaque(false);
     }
 
-    public void initMediaPlayer() {
+    private void initMediaPlayer() {
         mediaPlayer = new MediaPlayer();
         mediaPlayer.setScreenOnWhilePlaying(true);
         mediaPlayer.setLooping(true);
@@ -73,6 +80,37 @@ public class AlphaMovieView extends GLTextureView {
                 }
             }
         });
+    }
+
+    private void obtainRendererOptions(AttributeSet attrs) {
+        if (attrs != null) {
+            TypedArray arr = getContext().obtainStyledAttributes(attrs, R.styleable.AlphaMovieView);
+            String shader = arr.getString(R.styleable.AlphaMovieView_shader);
+            if (shader != null) {
+                switch (shader) {
+                    case RED:
+                        renderer.setRedShader();
+                        break;
+                    case GREEN:
+                        renderer.setGreenShader();
+                        break;
+                    case BLUE:
+                        renderer.setBlueShader();
+                        break;
+                    default:
+                        boolean useCustomShader = arr.getBoolean(R.styleable.AlphaMovieView_useCustomShader, false);
+                        if (useCustomShader) {
+                            renderer.setCustomShader(shader);
+                        }
+                        break;
+                }
+            }
+            float accuracy = arr.getFloat(R.styleable.AlphaMovieView_accuracy, -1);
+            if (accuracy != -1) {
+                renderer.setAccuracy(accuracy);
+            }
+            arr.recycle();
+        }
     }
 
     private void addOnSurfacePrepareListener() {
@@ -216,6 +254,21 @@ public class AlphaMovieView extends GLTextureView {
         onDataSourceSet(retriever);
     }
 
+    public void setVideoFromUri(Context context, Uri uri) {
+        reset();
+
+        try {
+            mediaPlayer.setDataSource(context, uri);
+
+            MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(context, uri);
+
+            onDataSourceSet(retriever);
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage(), e);
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -286,14 +339,8 @@ public class AlphaMovieView extends GLTextureView {
 
     public void stop() {
         if (mediaPlayer != null && (state == PlayerState.STARTED || state == PlayerState.PAUSED)) {
-            mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
-                @Override
-                public void onSeekComplete(MediaPlayer mp) {
-                    mediaPlayer.stop();
-                    state = PlayerState.STOPPED;
-                }
-            });
-            mediaPlayer.seekTo(0);
+            mediaPlayer.stop();
+            state = PlayerState.STOPPED;
         }
     }
 
@@ -312,6 +359,26 @@ public class AlphaMovieView extends GLTextureView {
         }
     }
 
+    public PlayerState getState() {
+        return state;
+    }
+
+    public boolean isPlaying() {
+        return state == PlayerState.STARTED;
+    }
+
+    public boolean isPaused() {
+        return state == PlayerState.PAUSED;
+    }
+
+    public boolean isStopped() {
+        return state == PlayerState.STOPPED;
+    }
+
+    public boolean isReleased() {
+        return state == PlayerState.RELEASE;
+    }
+
     public void seekTo(int msec) {
         mediaPlayer.seekTo(msec);
     }
@@ -320,8 +387,16 @@ public class AlphaMovieView extends GLTextureView {
         mediaPlayer.setLooping(looping);
     }
 
+    public int getCurrentPosition() {
+        return mediaPlayer.getCurrentPosition();
+    }
+
     public void setScreenOnWhilePlaying(boolean screenOn) {
         mediaPlayer.setScreenOnWhilePlaying(screenOn);
+    }
+
+    public void setOnErrorListener(MediaPlayer.OnErrorListener onErrorListener){
+        mediaPlayer.setOnErrorListener(onErrorListener);
     }
 
     public void setOnVideoStartedListener(OnVideoStartedListener onVideoStartedListener) {
@@ -330,6 +405,14 @@ public class AlphaMovieView extends GLTextureView {
 
     public void setOnVideoEndedListener(OnVideoEndedListener onVideoEndedListener) {
         this.onVideoEndedListener = onVideoEndedListener;
+    }
+
+    public void setOnSeekCompleteListener(MediaPlayer.OnSeekCompleteListener onSeekCompleteListener) {
+        mediaPlayer.setOnSeekCompleteListener(onSeekCompleteListener);
+    }
+
+    public MediaPlayer getMediaPlayer() {
+        return mediaPlayer;
     }
 
     public interface OnVideoStartedListener {

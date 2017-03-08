@@ -9,18 +9,19 @@ import android.view.Surface;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.Locale;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnFrameAvailableListener {
+class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnFrameAvailableListener {
     private static String TAG = "VideoRender";
 
     private static final int FLOAT_SIZE_BYTES = 4;
     private static final int TRIANGLE_VERTICES_DATA_STRIDE_BYTES = 5 * FLOAT_SIZE_BYTES;
     private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
     private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
-    private final float[] mTriangleVerticesData = {
+    private final float[] triangleVerticesData = {
             // X, Y, Z, U, V
             -1.0f, -1.0f, 0, 0.f, 0.f,
             1.0f, -1.0f, 0, 1.f, 0.f,
@@ -28,9 +29,9 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
             1.0f,  1.0f, 0, 1.f, 1.f,
     };
 
-    private FloatBuffer mTriangleVertices;
+    private FloatBuffer triangleVertices;
 
-    private final String mVertexShader =
+    private final String vertexShader =
             "uniform mat4 uMVPMatrix;\n" +
                     "uniform mat4 uSTMatrix;\n" +
                     "attribute vec4 aPosition;\n" +
@@ -83,43 +84,44 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
             + "  }\n"
             + "}\n";
 
-    private double accuracy = 0.5;
+    private double accuracy = 0.1;
 
     private String shader = greenShader;
 
-    private float[] mMVPMatrix = new float[16];
-    private float[] mSTMatrix = new float[16];
+    private float[] mVPMatrix = new float[16];
+    private float[] sTMatrix = new float[16];
 
-    private int mProgram;
-    private int mProgramTransparent;
-    private int mTextureID;
-    private int muMVPMatrixHandle;
-    private int muSTMatrixHandle;
-    private int maPositionHandle;
-    private int maTextureHandle;
+    private int program;
+    private int textureID;
+    private int uMVPMatrixHandle;
+    private int uSTMatrixHandle;
+    private int aPositionHandle;
+    private int aTextureHandle;
 
-    private SurfaceTexture mSurface;
+    private SurfaceTexture surface;
     private boolean updateSurface = false;
 
     private static int GL_TEXTURE_EXTERNAL_OES = 0x8D65;
 
     private OnSurfacePrepareListener onSurfacePrepareListener;
 
-    VideoRenderer() {
-        mTriangleVertices = ByteBuffer.allocateDirect(
-                mTriangleVerticesData.length * FLOAT_SIZE_BYTES)
-                .order(ByteOrder.nativeOrder()).asFloatBuffer();
-        mTriangleVertices.put(mTriangleVerticesData).position(0);
+    private boolean isCustom;
 
-        Matrix.setIdentityM(mSTMatrix, 0);
+    VideoRenderer() {
+        triangleVertices = ByteBuffer.allocateDirect(
+                triangleVerticesData.length * FLOAT_SIZE_BYTES)
+                .order(ByteOrder.nativeOrder()).asFloatBuffer();
+        triangleVertices.put(triangleVerticesData).position(0);
+
+        Matrix.setIdentityM(sTMatrix, 0);
     }
 
     @Override
     public void onDrawFrame(GL10 glUnused) {
         synchronized(this) {
             if (updateSurface) {
-                mSurface.updateTexImage();
-                mSurface.getTransformMatrix(mSTMatrix);
+                surface.updateTexImage();
+                surface.getTransformMatrix(sTMatrix);
                 updateSurface = false;
             }
         }
@@ -129,29 +131,29 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
         GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
-        GLES20.glUseProgram(mProgram);
+        GLES20.glUseProgram(program);
         checkGlError("glUseProgram");
 
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GL_TEXTURE_EXTERNAL_OES, mTextureID);
+        GLES20.glBindTexture(GL_TEXTURE_EXTERNAL_OES, textureID);
 
-        mTriangleVertices.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
-        GLES20.glVertexAttribPointer(maPositionHandle, 3, GLES20.GL_FLOAT, false,
-                TRIANGLE_VERTICES_DATA_STRIDE_BYTES, mTriangleVertices);
+        triangleVertices.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
+        GLES20.glVertexAttribPointer(aPositionHandle, 3, GLES20.GL_FLOAT, false,
+                TRIANGLE_VERTICES_DATA_STRIDE_BYTES, triangleVertices);
         checkGlError("glVertexAttribPointer maPosition");
-        GLES20.glEnableVertexAttribArray(maPositionHandle);
-        checkGlError("glEnableVertexAttribArray maPositionHandle");
+        GLES20.glEnableVertexAttribArray(aPositionHandle);
+        checkGlError("glEnableVertexAttribArray aPositionHandle");
 
-        mTriangleVertices.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
-        GLES20.glVertexAttribPointer(maTextureHandle, 3, GLES20.GL_FLOAT, false,
-                TRIANGLE_VERTICES_DATA_STRIDE_BYTES, mTriangleVertices);
-        checkGlError("glVertexAttribPointer maTextureHandle");
-        GLES20.glEnableVertexAttribArray(maTextureHandle);
-        checkGlError("glEnableVertexAttribArray maTextureHandle");
+        triangleVertices.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
+        GLES20.glVertexAttribPointer(aTextureHandle, 3, GLES20.GL_FLOAT, false,
+                TRIANGLE_VERTICES_DATA_STRIDE_BYTES, triangleVertices);
+        checkGlError("glVertexAttribPointer aTextureHandle");
+        GLES20.glEnableVertexAttribArray(aTextureHandle);
+        checkGlError("glEnableVertexAttribArray aTextureHandle");
 
-        Matrix.setIdentityM(mMVPMatrix, 0);
-        GLES20.glUniformMatrix4fv(muMVPMatrixHandle, 1, false, mMVPMatrix, 0);
-        GLES20.glUniformMatrix4fv(muSTMatrixHandle, 1, false, mSTMatrix, 0);
+        Matrix.setIdentityM(mVPMatrix, 0);
+        GLES20.glUniformMatrix4fv(uMVPMatrixHandle, 1, false, mVPMatrix, 0);
+        GLES20.glUniformMatrix4fv(uSTMatrixHandle, 1, false, sTMatrix, 0);
 
         GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, 4);
         checkGlError("glDrawArrays");
@@ -170,53 +172,53 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
 
     @Override
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
-        mProgram = createProgram(mVertexShader, this.resolveShader());
-        if (mProgram == 0) {
+        program = createProgram(vertexShader, this.resolveShader());
+        if (program == 0) {
             return;
         }
-        maPositionHandle = GLES20.glGetAttribLocation(mProgram, "aPosition");
+        aPositionHandle = GLES20.glGetAttribLocation(program, "aPosition");
         checkGlError("glGetAttribLocation aPosition");
-        if (maPositionHandle == -1) {
+        if (aPositionHandle == -1) {
             throw new RuntimeException("Could not get attrib location for aPosition");
         }
-        maTextureHandle = GLES20.glGetAttribLocation(mProgram, "aTextureCoord");
+        aTextureHandle = GLES20.glGetAttribLocation(program, "aTextureCoord");
         checkGlError("glGetAttribLocation aTextureCoord");
-        if (maTextureHandle == -1) {
+        if (aTextureHandle == -1) {
             throw new RuntimeException("Could not get attrib location for aTextureCoord");
         }
 
-        muMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
+        uMVPMatrixHandle = GLES20.glGetUniformLocation(program, "uMVPMatrix");
         checkGlError("glGetUniformLocation uMVPMatrix");
-        if (muMVPMatrixHandle == -1) {
+        if (uMVPMatrixHandle == -1) {
             throw new RuntimeException("Could not get attrib location for uMVPMatrix");
         }
 
-        muSTMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uSTMatrix");
+        uSTMatrixHandle = GLES20.glGetUniformLocation(program, "uSTMatrix");
         checkGlError("glGetUniformLocation uSTMatrix");
-        if (muSTMatrixHandle == -1) {
+        if (uSTMatrixHandle == -1) {
             throw new RuntimeException("Could not get attrib location for uSTMatrix");
         }
 
         prepareSurface();
     }
 
-    void prepareSurface() {
+    private void prepareSurface() {
         int[] textures = new int[1];
         GLES20.glGenTextures(1, textures, 0);
 
-        mTextureID = textures[0];
-        GLES20.glBindTexture(GL_TEXTURE_EXTERNAL_OES, mTextureID);
-        checkGlError("glBindTexture mTextureID");
+        textureID = textures[0];
+        GLES20.glBindTexture(GL_TEXTURE_EXTERNAL_OES, textureID);
+        checkGlError("glBindTexture textureID");
 
         GLES20.glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MIN_FILTER,
                 GLES20.GL_NEAREST);
         GLES20.glTexParameterf(GL_TEXTURE_EXTERNAL_OES, GLES20.GL_TEXTURE_MAG_FILTER,
                 GLES20.GL_LINEAR);
 
-        mSurface = new SurfaceTexture(mTextureID);
-        mSurface.setOnFrameAvailableListener(this);
+        surface = new SurfaceTexture(textureID);
+        surface.setOnFrameAvailableListener(this);
 
-        Surface surface = new Surface(mSurface);
+        Surface surface = new Surface(this.surface);
         onSurfacePrepareListener.surfacePrepared(surface);
 
         synchronized(this) {
@@ -275,15 +277,23 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
     }
 
     public void setRedShader() {
+        isCustom = false;
         shader = redShader;
     }
 
     public void setGreenShader() {
+        isCustom = false;
         shader = greenShader;
     }
 
     public void setBlueShader() {
+        isCustom = false;
         shader = blueShader;
+    }
+
+    public void setCustomShader(String customShader) {
+        isCustom = true;
+        shader = customShader;
     }
 
     public void setAccuracy(double accuracy) {
@@ -300,12 +310,12 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
     }
 
     private String resolveShader() {
-        return String.format(shader, accuracy, accuracy);
+        return isCustom ? shader : String.format(Locale.ENGLISH, shader, accuracy, accuracy);
     }
 
     private void checkGlError(String op) {
         int error;
-        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
+        if ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
             Log.e(TAG, op + ": glError " + error);
             throw new RuntimeException(op + ": glError " + error);
         }
@@ -315,7 +325,7 @@ public class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnF
         this.onSurfacePrepareListener = onSurfacePrepareListener;
     }
 
-    public interface OnSurfacePrepareListener {
+    interface OnSurfacePrepareListener {
         void surfacePrepared(Surface surface);
     }
 
