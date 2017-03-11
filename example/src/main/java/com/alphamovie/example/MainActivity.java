@@ -3,8 +3,8 @@ package com.alphamovie.example;
 import android.graphics.PixelFormat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 
 import com.alphamovie.lib.AlphaMovieView;
 
@@ -14,7 +14,7 @@ public class MainActivity extends AppCompatActivity {
 
     private AlphaMovieView alphaMovieView;
 
-    private View container;
+    private ImageView imageViewBackground;
     private int bgIndex = 0;
 
     @Override
@@ -23,11 +23,11 @@ public class MainActivity extends AppCompatActivity {
         getWindow().setFormat(PixelFormat.TRANSLUCENT);
         setContentView(R.layout.activity_main);
 
-        container = findViewById(R.id.container);
+        imageViewBackground = (ImageView) findViewById(R.id.image_background);
 
         alphaMovieView = (AlphaMovieView) findViewById(R.id.video_player);
+        alphaMovieView.setLooping(true);
         alphaMovieView.setVideoFromAssets("ball.mp4");
-        alphaMovieView.setLooping(false);
     }
 
     @Override
@@ -56,10 +56,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void changeBackground(View view) {
         bgIndex = ++bgIndex % 3;
-        container.setBackgroundResource(backgroundResources[bgIndex]);
-    }
-
-    public void addNew(View view) {
-        alphaMovieView.setVideoFromAssets("ball.mp4");
+        imageViewBackground.setImageResource(backgroundResources[bgIndex]);
     }
 }

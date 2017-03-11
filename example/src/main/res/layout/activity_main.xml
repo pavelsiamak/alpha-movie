@@ -3,18 +3,24 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
     android:orientation="vertical">
 
     <FrameLayout
-        android:id="@+id/container"
         android:layout_width="match_parent"
-        android:layout_height="270dip"
-        android:background="@drawable/court_blue">
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/image_background"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/court_blue"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:contentDescription="@null"/>
 
         <com.alphamovie.lib.AlphaMovieView
             android:id="@+id/video_player"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             custom:shader="green"
@@ -26,46 +32,51 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center">
+
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@null"
             android:src="@drawable/button_play"
-            android:text="play"
             android:onClick="play"
-            android:padding="20dip"/>
+            android:padding="@dimen/image_button_padding"
+            android:contentDescription="@null"/>
 
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@null"
             android:src="@drawable/button_pause"
-            android:text="pause"
             android:onClick="pause"
-            android:padding="20dip"/>
+            android:padding="@dimen/image_button_padding"
+            android:contentDescription="@null"/>
 
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@null"
             android:src="@drawable/button_stop"
-            android:text="stop"
             android:onClick="stop"
-            android:padding="20dip"/>
+            android:padding="@dimen/image_button_padding"
+            android:contentDescription="@null"/>
+
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:layout_margin="5dip">
+        android:gravity="center">
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/change_bg"
+            android:textSize="@dimen/change_bg_button_text_size"
             android:textColor="@android:color/white"
             android:background="@drawable/button_background"
-            android:onClick="changeBackground"/>
+            android:onClick="changeBackground"
+            android:layout_margin="@dimen/change_bg_button_margin" />
+
     </LinearLayout>
 
 </LinearLayout>

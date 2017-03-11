@@ -1,0 +1,9 @@
+<resources>
+    <dimen name="image_button_padding">30dp</dimen>
+    <dimen name="change_bg_button_margin">30dp</dimen>
+    <dimen name="change_bg_button_text_size">32sp</dimen>
+
+    <dimen name="button_bg_radius">20dp</dimen>
+    <dimen name="button_bg_padding_horizontal">40dp</dimen>
+    <dimen name="button_bg_padding_vertical">25dp</dimen>
+</resources>
