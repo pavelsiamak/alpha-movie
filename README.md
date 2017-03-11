@@ -1,1 +1,1 @@
-# alphamovie
+Android video player with alpha channel support
