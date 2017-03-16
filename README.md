@@ -11,7 +11,7 @@ Video Player uses `OpenGL` to render video and apply *shader* that makes alpha c
 [ ![jCenter](https://api.bintray.com/packages/pavelsemak/alpha-movie/alpha-movie/images/download.svg) ](https://bintray.com/pavelsemak/alpha-movie/alpha-movie/_latestVersion)
 [![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0.html)
 
-The easiest way to start using Alpha Movie is to add it as a Gradle Dependency. The Gradle dependency is available via [jCenter](https://bintray.com/pavelsemak/alpha-movie/alpha-movie/view). Please make sure that you have the jcenter repository included in the project's `build.gradle` file (jCenter is the default Maven repository used by Android Studio):
+The easiest way to start using Alpha Movie is to add it as a *Gradle Dependency*. The Gradle dependency is available via [jCenter](https://bintray.com/pavelsemak/alpha-movie/alpha-movie/view). Please make sure that you have the jcenter repository included in the project's `build.gradle` file (*jCenter* is the default Maven repository used by Android Studio):
 
 ```gradle
 repositories {
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 }
 ```
 
-In this code snippet we load video from *assets* specifying filename `"video.mp4"`:
+In this code snippet we load video from *assets* specifying filename `video.mp4`:
 
 ```java
 alphaMovieView.setVideoFromAssets("video.mp4");
@@ -82,6 +82,7 @@ You need to add `alphaMovieView.onPause()` and `alphaMovieView.onResume()` in ac
 ---
 
 ## How it works?
+
 Alpha Movie player uses `OpenGL` to render video with a *shader* attached to gl renderer. This *shader* modifies each pixel of video frame. By default it converts *green* color to transparent.
 So default alpha channel color is *green*. This color can be changed to *red* or *blue*.
 
@@ -102,6 +103,7 @@ So default alpha channel color is *green*. This color can be changed to *red* or
 
 By default `accuracy="0.1"`. Accuracy is the value between **0** and **1**. Accuracy should be lower if you wish more shades of specified color be transparent and vice versa.
 
+#### Custom shader
 
 There is a possibility to apply your own *custom shader*. Add shader and `useCustomShader` attrs:
 
