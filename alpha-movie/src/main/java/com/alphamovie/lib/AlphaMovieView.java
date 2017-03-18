@@ -36,9 +36,13 @@ import java.util.HashMap;
 @SuppressLint("ViewConstructor")
 public class AlphaMovieView extends GLTextureView {
 
+    private static final int GL_CONTEXT_VERSION = 2;
+
     private static final String RED = "0";
     private static final String GREEN = "1";
     private static final String BLUE = "2";
+
+    private static final int NOT_DEFINED = -1;
 
     private static final String TAG = "VideoSurfaceView";
 
@@ -65,7 +69,7 @@ public class AlphaMovieView extends GLTextureView {
     }
 
     private void init(AttributeSet attrs) {
-        setEGLContextClientVersion(2);
+        setEGLContextClientVersion(GL_CONTEXT_VERSION);
         setEGLConfigChooser(8, 8, 8, 8, 16, 0);
 
         initMediaPlayer();
@@ -84,8 +88,8 @@ public class AlphaMovieView extends GLTextureView {
 
     private void initMediaPlayer() {
         mediaPlayer = new MediaPlayer();
-        mediaPlayer.setScreenOnWhilePlaying(true);
-        mediaPlayer.setLooping(true);
+        setScreenOnWhilePlaying(true);
+        setLooping(true);
 
         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
@@ -121,8 +125,8 @@ public class AlphaMovieView extends GLTextureView {
                         break;
                 }
             }
-            float accuracy = arr.getFloat(R.styleable.AlphaMovieView_accuracy, -1);
-            if (accuracy != -1) {
+            float accuracy = arr.getFloat(R.styleable.AlphaMovieView_accuracy, NOT_DEFINED);
+            if (accuracy != NOT_DEFINED) {
                 renderer.setAccuracy(accuracy);
             }
             arr.recycle();
