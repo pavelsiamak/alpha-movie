@@ -25,13 +25,18 @@ import android.widget.ImageView;
 import com.alphamovie.lib.AlphaMovieView;
 
 public class MainActivity extends AppCompatActivity {
+    public static final String FILENAME = "ball.mp4";
+
+    public static final int FIRST_BG_INDEX = 0;
+    public static final int BG_ARRAY_LENGTH = 3;
+
     public static final int[] backgroundResources = new int[]{R.drawable.court_blue,
             R.drawable.court_green, R.drawable.court_red};
 
     private AlphaMovieView alphaMovieView;
 
     private ImageView imageViewBackground;
-    private int bgIndex = 0;
+    private int bgIndex = FIRST_BG_INDEX;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,14 +47,13 @@ public class MainActivity extends AppCompatActivity {
         imageViewBackground = (ImageView) findViewById(R.id.image_background);
 
         alphaMovieView = (AlphaMovieView) findViewById(R.id.video_player);
-        alphaMovieView.setLooping(true);
-        alphaMovieView.setVideoFromAssets("ball.mp4");
+        alphaMovieView.setVideoFromAssets(FILENAME);
     }
 
     @Override
     public void onResume() {
-        alphaMovieView.onResume();
         super.onResume();
+        alphaMovieView.onResume();
     }
 
     @Override
@@ -71,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void changeBackground(View view) {
-        bgIndex = ++bgIndex % 3;
+        bgIndex = ++bgIndex % BG_ARRAY_LENGTH;
         imageViewBackground.setImageResource(backgroundResources[bgIndex]);
     }
 }
