@@ -13,7 +13,7 @@ ext {
     siteUrl = 'https://github.com/pavelsemak/alpha-movie'
     gitUrl = 'https://github.com/pavelsemak/alpha-movie.git'
 
-    libraryVersion = '1.0.1'
+    libraryVersion = '1.1.0'
 
     developerId = 'pavelsemak'
     developerName = 'Pavel Semak'
@@ -32,7 +32,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0.1"
+        versionName "1.1.0"
     }
     buildTypes {
         release {
