@@ -2,7 +2,7 @@
 
 Alpha Movie is an Android video player library with alpha channel support.
 
-Video Player uses `OpenGL` to render video and apply *shader* that makes alpha compositing possible. The player encapsulates `MediaPlayer` and has its base functionality.
+Video Player uses `OpenGL` to render video and apply *shader* that makes alpha compositing possible. The player encapsulates `MediaPlayer` and has its base functionality. Video stream is displayed by `TextureView`.
 
 ---
 
@@ -24,7 +24,7 @@ Then add this dependency to your module's `build.gradle` file:
 ```gradle
 dependencies {
     // ... other dependencies
-    compile 'com.alphamovie.library:alpha-movie:1.0.0'
+    compile 'com.alphamovie.library:alpha-movie:1.1.0'
 }
 ```
 
@@ -78,6 +78,8 @@ alphaMovieView.setVideoFromAssets("video.mp4");
 Video can also be set by *Url, FileDescriptor, MediaSource* and other sources.
 
 You need to add `alphaMovieView.onPause()` and `alphaMovieView.onResume()` in activity's `onPause()` and `onResume()` callbacks. Calling these methods will pause and resume `OpenGL` rendering thread.
+
+Video playback can be paused and resumed using `alphaMovieView.pause()` and `alphaMovieView.start()` methods.
 
 ---
 
