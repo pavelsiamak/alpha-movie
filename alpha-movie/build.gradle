@@ -13,7 +13,7 @@ ext {
     siteUrl = 'https://github.com/pavelsemak/alpha-movie'
     gitUrl = 'https://github.com/pavelsemak/alpha-movie.git'
 
-    libraryVersion = '1.2.0'
+    libraryVersion = '1.2.1'
 
     developerId = 'pavelsemak'
     developerName = 'Pavel Semak'
