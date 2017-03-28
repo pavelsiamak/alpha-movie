@@ -24,7 +24,7 @@ Then add this dependency to your module's `build.gradle` file:
 ```gradle
 dependencies {
     // ... other dependencies
-    compile 'com.alphamovie.library:alpha-movie:1.1.0'
+    compile 'com.alphamovie.library:alpha-movie:1.2.0'
 }
 ```
 
@@ -86,7 +86,8 @@ Video playback can be paused and resumed using `alphaMovieView.pause()` and `alp
 ## How it works?
 
 Alpha Movie player uses `OpenGL` to render video with a *shader* attached to gl renderer. This *shader* modifies each pixel of video frame. By default it converts *green* color to transparent.
-So default alpha channel color is *green*. This color can be changed to *red* or *blue*.
+
+So default alpha channel color is *green*. This color can be changed to any *rgb* color by adding xml attribute `alphaColor`:
 
 ```xml
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -98,16 +99,17 @@ So default alpha channel color is *green*. This color can be changed to *red* or
         android:id="@+id/video_player"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        custom:shader="red"
-        custom:accuracy="0.1"/>
+        custom:alphaColor="#ff0000"
+        custom:accuracy="0.7"/>
 </FrameLayout>
 ```
+In the code snippet above we set `custom:alphaColor="#ff0000"`. It means that alpha channel color is set to red.
 
-By default `accuracy="0.1"`. Accuracy is the value between **0** and **1**. Accuracy should be lower if you wish more shades of specified color be transparent and vice versa.
+Also we specify *accuracy* attr to be *0.7*. Accuracy is the value between **0** and **1**. It should be lower if you wish more shades of specified color be transparent and vice versa. By default `accuracy="0.95"`. 
 
 #### Custom shader
 
-There is a possibility to apply your own *custom shader*. Add shader and `useCustomShader` attrs:
+There is a possibility to apply your own *custom shader*. Add `shader` attr:
 
 ```xml
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -119,8 +121,7 @@ There is a possibility to apply your own *custom shader*. Add shader and `useCus
         android:id="@+id/video_player"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        custom:shader="@string/shader_custom"
-        custom:useCustomShader="true"/>
+        custom:shader="@string/shader_custom"/>
 </FrameLayout>
 ```
 
@@ -136,8 +137,8 @@ And define your custom shader in *string* values, for example:
             varying mediump float text_alpha_out;
             void main() {
               vec4 color = texture2D(sTexture, vTextureCoord);
-              if (color.b - color.r >= 0.1 &amp;&amp; color.b - color.g >= 0.1) {
-                  gl_FragColor = vec4(color.r, color.g, (color.r + color.g) / 2.0, 1.0 - color.b);
+              if (color.g - color.r >= 0.1 &amp;&amp; color.g - color.b >= 0.1) {
+                  gl_FragColor = vec4(color.r, (color.r + color.b) / 2.0, color.b, 1.0 - color.g);
               } else {
                   gl_FragColor = vec4(color.r, color.g, color.b, color.a);
               }
@@ -146,4 +147,4 @@ And define your custom shader in *string* values, for example:
 </resources>
 ```
 
-In this case accuracy attr is not affecting anything because it is used only with library-defined shader values such as *red*, *green*, *blue*.
+In this case accuracy and alphaColor attrs are not affecting anything because they are used only when custom shader is not defined.
