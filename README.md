@@ -24,7 +24,7 @@ Then add this dependency to your module's `build.gradle` file:
 ```gradle
 dependencies {
     // ... other dependencies
-    compile 'com.alphamovie.library:alpha-movie:1.2.0'
+    compile 'com.alphamovie.library:alpha-movie:1.2.1'
 }
 ```
 
