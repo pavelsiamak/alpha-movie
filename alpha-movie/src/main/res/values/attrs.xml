@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="AlphaMovieView">
-        <attr name="shader" format="string" >
-            <enum name="red" value="0"/>
-            <enum name="green" value="1"/>
-            <enum name="blue" value="2"/>
-        </attr>
-        <attr name="useCustomShader" format="boolean" />
+        <attr name="alphaColor" format="color" />
+        <attr name="shader" format="string" />
         <attr name="accuracy" format="float" />
     </declare-styleable>
 </resources>

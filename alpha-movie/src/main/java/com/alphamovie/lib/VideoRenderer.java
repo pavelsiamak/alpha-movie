@@ -16,6 +16,7 @@
 
 package com.alphamovie.lib;
 
+import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
@@ -58,51 +59,27 @@ class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnFrameAva
                     "  vTextureCoord = (uSTMatrix * aTextureCoord).xy;\n" +
                     "}\n";
 
-    private final String redShader = "#extension GL_OES_EGL_image_external : require\n"
+    private final String alphaShader = "#extension GL_OES_EGL_image_external : require\n"
             + "precision mediump float;\n"
             + "varying vec2 vTextureCoord;\n"
             + "uniform samplerExternalOES sTexture;\n"
             + "varying mediump float text_alpha_out;\n"
             + "void main() {\n"
             + "  vec4 color = texture2D(sTexture, vTextureCoord);\n"
-            + "  if (color.r - color.g >= %f && color.r - color.b >= %f) {\n"
-            + "      gl_FragColor = vec4((color.g + color.b) / 2.0, color.g, color.b, 1.0 - color.r);\n"
+            + "  float red = %f;\n"
+            + "  float green = %f;\n"
+            + "  float blue = %f;\n"
+            + "  float accuracy = %f;\n"
+            + "  if (abs(color.r - red) <= accuracy && abs(color.g - green) <= accuracy && abs(color.b - blue) <= accuracy) {\n"
+            + "      gl_FragColor = vec4(color.r, color.g, color.b, 0.0);\n"
             + "  } else {\n"
-            + "      gl_FragColor = vec4(color.r, color.g, color.b, color.a);\n"
+            + "      gl_FragColor = vec4(color.r, color.g, color.b, 1.0);\n"
             + "  }\n"
             + "}\n";
 
-    private final String greenShader = "#extension GL_OES_EGL_image_external : require\n"
-            + "precision mediump float;\n"
-            + "varying vec2 vTextureCoord;\n"
-            + "uniform samplerExternalOES sTexture;\n"
-            + "varying mediump float text_alpha_out;\n"
-            + "void main() {\n"
-            + "  vec4 color = texture2D(sTexture, vTextureCoord);\n"
-            + "  if (color.g - color.r >= %f && color.g - color.b >= %f) {\n"
-            + "      gl_FragColor = vec4(color.r, (color.r + color.b) / 2.0, color.b, 1.0 - color.g);\n"
-            + "  } else {\n"
-            + "      gl_FragColor = vec4(color.r, color.g, color.b, color.a);\n"
-            + "  }\n"
-            + "}\n";
+    private double accuracy = 0.95;
 
-    private final String blueShader = "#extension GL_OES_EGL_image_external : require\n"
-            + "precision mediump float;\n"
-            + "varying vec2 vTextureCoord;\n"
-            + "uniform samplerExternalOES sTexture;\n"
-            + "varying mediump float text_alpha_out;\n"
-            + "void main() {\n"
-            + "  vec4 color = texture2D(sTexture, vTextureCoord);\n"
-            + "  if (color.b - color.r >= %f && color.b - color.g >= %f) {\n"
-            + "      gl_FragColor = vec4(color.r, color.g, (color.r + color.g) / 2.0, 1.0 - color.b);\n"
-            + "  } else {\n"
-            + "      gl_FragColor = vec4(color.r, color.g, color.b, color.a);\n"
-            + "  }\n"
-            + "}\n";
-
-    private double accuracy = 0.1;
-
-    private String shader = greenShader;
+    private String shader = alphaShader;
 
     private float[] mVPMatrix = new float[16];
     private float[] sTMatrix = new float[16];
@@ -122,6 +99,10 @@ class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnFrameAva
     private OnSurfacePrepareListener onSurfacePrepareListener;
 
     private boolean isCustom;
+
+    private float redParam = 0.0f;
+    private float greenParam = 1.0f;
+    private float blueParam = 0.0f;
 
     VideoRenderer() {
         triangleVertices = ByteBuffer.allocateDirect(
@@ -292,27 +273,18 @@ class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnFrameAva
         return program;
     }
 
-    public void setRedShader() {
-        isCustom = false;
-        shader = redShader;
+    void setAlphaColor(int color) {
+        redParam = (float) Color.red(color) / 255;
+        greenParam = (float) Color.green(color) / 255;
+        blueParam = (float) Color.blue(color) / 255;
     }
 
-    public void setGreenShader() {
-        isCustom = false;
-        shader = greenShader;
-    }
-
-    public void setBlueShader() {
-        isCustom = false;
-        shader = blueShader;
-    }
-
-    public void setCustomShader(String customShader) {
+    void setCustomShader(String customShader) {
         isCustom = true;
         shader = customShader;
     }
 
-    public void setAccuracy(double accuracy) {
+    void setAccuracy(double accuracy) {
         if (accuracy > 1.0) {
             accuracy = 1.0;
         } else if (accuracy < 0.0) {
@@ -326,7 +298,8 @@ class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnFrameAva
     }
 
     private String resolveShader() {
-        return isCustom ? shader : String.format(Locale.ENGLISH, shader, accuracy, accuracy);
+        return isCustom ? shader : String.format(Locale.ENGLISH, alphaShader,
+                redParam, greenParam, blueParam, 1 - accuracy);
     }
 
     private void checkGlError(String op) {

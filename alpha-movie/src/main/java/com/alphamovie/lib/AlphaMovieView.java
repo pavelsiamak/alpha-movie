@@ -38,11 +38,8 @@ public class AlphaMovieView extends GLTextureView {
 
     private static final int GL_CONTEXT_VERSION = 2;
 
-    private static final String RED = "0";
-    private static final String GREEN = "1";
-    private static final String BLUE = "2";
-
     private static final int NOT_DEFINED = -1;
+    private static final int NOT_DEFINED_COLOR = 0;
 
     private static final String TAG = "VideoSurfaceView";
 
@@ -105,25 +102,13 @@ public class AlphaMovieView extends GLTextureView {
     private void obtainRendererOptions(AttributeSet attrs) {
         if (attrs != null) {
             TypedArray arr = getContext().obtainStyledAttributes(attrs, R.styleable.AlphaMovieView);
+            int alphaColor = arr.getColor(R.styleable.AlphaMovieView_alphaColor, NOT_DEFINED_COLOR);
+            if (alphaColor != NOT_DEFINED_COLOR) {
+                renderer.setAlphaColor(alphaColor);
+            }
             String shader = arr.getString(R.styleable.AlphaMovieView_shader);
             if (shader != null) {
-                switch (shader) {
-                    case RED:
-                        renderer.setRedShader();
-                        break;
-                    case GREEN:
-                        renderer.setGreenShader();
-                        break;
-                    case BLUE:
-                        renderer.setBlueShader();
-                        break;
-                    default:
-                        boolean useCustomShader = arr.getBoolean(R.styleable.AlphaMovieView_useCustomShader, false);
-                        if (useCustomShader) {
-                            renderer.setCustomShader(shader);
-                        }
-                        break;
-                }
+                renderer.setCustomShader(shader);
             }
             float accuracy = arr.getFloat(R.styleable.AlphaMovieView_accuracy, NOT_DEFINED);
             if (accuracy != NOT_DEFINED) {
