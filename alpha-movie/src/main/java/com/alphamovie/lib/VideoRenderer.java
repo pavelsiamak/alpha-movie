@@ -34,6 +34,8 @@ import javax.microedition.khronos.opengles.GL10;
 class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnFrameAvailableListener {
     private static String TAG = "VideoRender";
 
+    private static final int COLOR_MAX_VALUE = 255;
+
     private static final int FLOAT_SIZE_BYTES = 4;
     private static final int TRIANGLE_VERTICES_DATA_STRIDE_BYTES = 5 * FLOAT_SIZE_BYTES;
     private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
@@ -274,9 +276,9 @@ class VideoRenderer implements GLTextureView.Renderer, SurfaceTexture.OnFrameAva
     }
 
     void setAlphaColor(int color) {
-        redParam = (float) Color.red(color) / 255;
-        greenParam = (float) Color.green(color) / 255;
-        blueParam = (float) Color.blue(color) / 255;
+        redParam = (float) Color.red(color) / COLOR_MAX_VALUE;
+        greenParam = (float) Color.green(color) / COLOR_MAX_VALUE;
+        blueParam = (float) Color.blue(color) / COLOR_MAX_VALUE;
     }
 
     void setCustomShader(String customShader) {
